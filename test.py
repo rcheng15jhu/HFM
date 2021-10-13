@@ -15,6 +15,7 @@ import time
 import NavierStokesModel
 from NavierStokesModel import NavierStokesModel
 
+rel_path = '../../scr4_rni2/rc_job_test/'
 
 tf.keras.backend.set_floatx('float64')
 
@@ -40,7 +41,7 @@ model = NavierStokesModel(uninformed_model, Pec, Rey, name="2D_PST_NS_INN")
 model.compile(keras.optimizers.Adam(), keras.metrics.mean_squared_error, ())# , run_eagerly=True)
 
 
-data = scipy.io.loadmat('Data/Cylinder2D.mat')
+data = scipy.io.loadmat(f'{rel_path}Data/Cylinder2D.mat')
 
 t_star = data['t_star']  # S x 1
 x_star = data['x_star']  # N x 1
@@ -102,11 +103,11 @@ epochs = 0
 while time.time() < start + 3600 * 3 and epochs < 500:
     model.fit([X, T], Y, epochs=5)
     epochs += 5
-    model.save(f"Learned/models/{model.name}_model_{datetime.now().strftime('%y.%m.%d.%H.%M.%S')}")
-    model.save_weights(f"Learned/model_weights/{model.name}_model_{datetime.now().strftime('%y.%m.%d.%H.%M.%S')}")
+    model.save(f"{rel_path}Learned/models/{model.name}_model_{datetime.now().strftime('%y.%m.%d.%H.%M.%S')}")
+    model.save_weights(f"{rel_path}Learned/model_weights/{model.name}_model_{datetime.now().strftime('%y.%m.%d.%H.%M.%S')}")
     #if on windows, and max_file_path_len has been reached
-    # model.save(f"C:/UserTemp/models/{model.name}_model_{datetime.now().strftime('%y.%m.%d.%H.%M.%S')}")
-    # model.save_weights(f"C:/UserTemp/model_weights/{model.name}_model_{datetime.now().strftime('%y.%m.%d.%H.%M.%S')}")
+    # model.save(f"{rel_path}C:/UserTemp/models/{model.name}_model_{datetime.now().strftime('%y.%m.%d.%H.%M.%S')}")
+    # model.save_weights(f"{rel_path}C:/UserTemp/model_weights/{model.name}_model_{datetime.now().strftime('%y.%m.%d.%H.%M.%S')}")
 
 end = time.time()
 
@@ -149,5 +150,5 @@ for snap in range(0, t_star.shape[0]):
 
 
 
-scipy.io.savemat('Results/Cylinder2D_results_%s.mat' %(datetime.now().strftime('%Y_%m_%d')),
+scipy.io.savemat(f'{rel_path}Results/Cylinder2D_results_%s.mat' %(datetime.now().strftime('%Y_%m_%d')),
          {'C_pred': C_pred, 'U_pred': U_pred, 'V_pred': V_pred, 'P_pred': P_pred, 'time': np.asarray([start, end])})
