@@ -1,6 +1,7 @@
 # TensorFlow and tf.keras
 import tensorflow as tf
 from tensorflow import keras
+from tensorflow.keras import layers
 
 class NavierStokesModel(keras.Model):
     def __init__(self, uninformed_model, Pec, Rey, loss_weights=[0.5,0.25,0.25], **kwargs):
@@ -19,21 +20,21 @@ class NavierStokesModel(keras.Model):
         self.num_train_class = num_train_class
     
     def train_step(self, data):
-        [x, t], y = data
-        ps_x, ps_y = tf.boolean_mask(x, t == 0, axis=0), tf.boolean_mask(y, t == 0)[:,0]
-        ge_x       = tf.boolean_mask(x, t == 1, axis=0)# , tf.boolean_mask(y, t == 1)
-        il_x, il_y = tf.boolean_mask(x, t == 2, axis=0), tf.boolean_mask(y, t == 2)
+        [X, T], Y = data
+        ps_X, ps_Y = tf.boolean_mask(X, T == 0, axis=0), tf.boolean_mask(Y, T == 0)[:,0]
+        ge_X       = tf.boolean_mask(X, T == 1, axis=0)# , tf.boolean_mask(Y, T == 1)
+        il_X, il_Y = tf.boolean_mask(X, T == 2, axis=0), tf.boolean_mask(Y, T == 2)
         
-        degen_grads = [0.0 for _ in self.ui_model.trainable_weights] # for graph mode
+        degen_grads = [tf.constant(0.0, dtype='float64') for _ in self.ui_model.trainable_weights] # for graph mode
         
         ps_grads = degen_grads
-        if(tf.shape(ps_x)[0] > 0):
+        if(tf.shape(ps_X)[0] > 0):
             # print("Find gradients for data mse term")
             
             with tf.GradientTape() as tape:
-                ps_c_pred, _ = self.ui_model(ps_x)
-                if ps_y.shape == ps_c_pred.shape:
-                    ps_loss = self.loss_fn(ps_y, ps_c_pred)
+                ps_c_pred, _ = self.ui_model(ps_X)
+                if ps_Y.shape == ps_c_pred.shape:
+                    ps_loss = self.loss_fn(ps_Y, ps_c_pred)
                 else:
                     ps_loss = 0.0
             if ps_loss != 0.0:
@@ -41,12 +42,12 @@ class NavierStokesModel(keras.Model):
         
         
         ge_grads = degen_grads
-        if(tf.shape(ge_x)[0] > 0):
+        if(tf.shape(ge_X)[0] > 0):
             # print("Find gradients for residual term")
             
-            t_in = ge_x[:,0:1]
-            x_in = ge_x[:,1:2]
-            y_in = ge_x[:,2:3]
+            t_in = ge_X[:,0:1]
+            x_in = ge_X[:,1:2]
+            y_in = ge_X[:,2:3]
             to_watch = [t_in, x_in, y_in]
             
             with tf.GradientTape() as tape:
@@ -83,14 +84,14 @@ class NavierStokesModel(keras.Model):
         
         
         il_grads = degen_grads
-        if(tf.shape(il_x)[0] > 0):
+        if(tf.shape(il_X)[0] > 0):
             # print("Find gradients for inlet term")
             
             with tf.GradientTape() as tape:
-                _, il_uvp_pred = self.ui_model(il_x)
-                il_y_pred = il_uvp_pred[:,0:2]
-                if il_y.shape == il_y_pred.shape:
-                    il_loss = self.loss_fn(il_y, il_y_pred)
+                _, il_uvp_pred = self.ui_model(il_X)
+                il_Y_pred = il_uvp_pred[:,0:2]
+                if il_Y.shape == il_Y_pred.shape:
+                    il_loss = self.loss_fn(il_Y, il_Y_pred)
                 else:
                     il_loss = 0.0
             if il_loss != 0.0:
