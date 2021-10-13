@@ -3,7 +3,7 @@
 #SBATCH --time=200:00:00
 #SBATCH --partition=defq
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=48
+#SBATCH --ntasks-per-node=4
 #SBATCH --mail-type=end
 #SBATCH --mail-user=rcheng15@jhu.edu
 
