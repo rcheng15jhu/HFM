@@ -3,3 +3,4 @@
 /Results
 *.out
 *.code-workspace
+*__pycache__/
