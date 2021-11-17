@@ -1,3 +1,6 @@
 *.ipynb_checkpoints/
 /Data
 /Results
+*.out
+*.code-workspace
+*__pycache__/

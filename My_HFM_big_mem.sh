@@ -1,7 +1,8 @@
 #!/bin/bash -l
 #SBATCH --job-name=My_HFM
-#SBATCH --time=3:00:00
-#SBATCH --partition=defq
+#SBATCH --time=03:00:00
+#SBATCH --partition=a100
+#SBATCH -A rni2_gpu
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=4
 #SBATCH --mail-type=end
